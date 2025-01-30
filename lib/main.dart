@@ -1,7 +1,7 @@
+import 'package:account/formScreen.dart';
 import 'package:account/model/transaction.dart';
 import 'package:account/provider/transactionProvider.dart';
 import 'package:flutter/material.dart';
-import 'formScreen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -11,23 +11,38 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) {
-            return TransactionProvider();
-          })
-        ],
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
+      providers: [
+        ChangeNotifierProvider(create: (context) {
+          return TransactionProvider();
+        })
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.dark(
+            primary: Colors.purple,
+            secondary: Colors.purpleAccent,
           ),
-          home: const MyHomePage(title: 'Flutter Demo Home Page'),
-        ));
+          scaffoldBackgroundColor: Colors.black,
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.purple.shade800,
+            foregroundColor: Colors.white,
+          ),
+          cardColor: Colors.purple.shade700,
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(
+                fontFamily: 'Roboto', fontSize: 18, color: Colors.white),
+            bodyMedium: TextStyle(
+                fontFamily: 'Roboto', fontSize: 16, color: Colors.white70),
+          ),
+          useMaterial3: true,
+        ),
+        home: const MyHomePage(title: 'รายการทั้งหมด'),
+      ),
+    );
   }
 }
 
@@ -44,42 +59,79 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return FormScreen();
-                }));
-              },
-            ),
-          ],
+      appBar: AppBar(
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: Consumer(
-          builder: (context, TransactionProvider provider, Widget? child) {
-            return ListView.builder(
-                itemCount: provider.transactions.length,
-                itemBuilder: (context, int index) {
-                  Transaction data = provider.transactions[index];
-                  return Card(
-                    elevation: 3,
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    child: ListTile(
-                      title: Text(data.title),
-                      subtitle: Text('วันที่บันทึกข้อมูล'),
-                      leading: CircleAvatar(
-                        child: FittedBox(
-                          child: Text(data.amount.toString()),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const FormScreen();
+              }));
+            },
+          )
+        ],
+      ),
+      body: Consumer<TransactionProvider>(
+        builder: (context, provider, child) {
+          return provider.transactions.isEmpty
+              ? const Center(
+                  child: Text(
+                    'ยังไม่มีข้อมูล',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: provider.transactions.length,
+                  itemBuilder: (context, int index) {
+                    Transaction data = provider.transactions[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 5,
+                      child: ListTile(
+                        title: Text(
+                          data.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'วันที่บันทึก: ${data.date.day.toString().padLeft(2, '0')}/'
+                          '${data.date.month.toString().padLeft(2, '0')}/'
+                          '${data.date.year} เวลา '
+                          '${data.date.hour.toString().padLeft(2, '0')}:'
+                          '${data.date.minute.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.white70),
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.purple.shade500,
+                          foregroundColor: Colors.white,
+                          child: FittedBox(
+                            child: Text(
+                              data.amount.toStringAsFixed(0),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                });
-          },
-        ));
+                    );
+                  },
+                );
+        },
+      ),
+    );
   }
 }
